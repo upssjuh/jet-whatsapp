@@ -1,0 +1,142 @@
+================================================================================
+                    JET + WHATSAPP INTEGRATION
+                         LEIA PRIMEIRO!
+================================================================================
+
+Ola! Seu projeto esta pronto para usar. Siga estes passos:
+
+================================================================================
+PASSO 1: EDITAR CREDENCIAIS
+================================================================================
+
+1. Abra o arquivo ".env" com o Bloco de Notas
+2. Preencha com suas credenciais:
+   - JET_INTEGRATION_KEY
+   - JET_USERNAME
+   - JET_PASSWORD
+   - JET_STORE_ID
+   - CONVERT_TOKEN
+   - CONVERT_TEMPLATE
+
+3. Salve o arquivo (Ctrl+S)
+
+================================================================================
+PASSO 2: EXECUTAR O SERVIDOR
+================================================================================
+
+Clique DUAS VEZES em:
+   >>> start-server.bat <<<
+
+Uma janela preta vai abrir. Deixe aberta!
+
+Voce vera:
+   🚀 Servidor rodando na porta 3000
+   Aguardando chamadas da JET...
+
+================================================================================
+PASSO 3: TESTAR (EM OUTRO TERMINAL)
+================================================================================
+
+Clique DUAS VEZES em:
+   >>> test-server.bat <<<
+
+Uma nova janela vai abrir e testar automaticamente.
+
+Voce vera:
+   ✅ Webhook enviado com sucesso!
+
+================================================================================
+PASSO 4: MONITORAR (OPCIONAL - EM OUTRO TERMINAL)
+================================================================================
+
+Clique DUAS VEZES em:
+   >>> monitor-server.bat <<<
+
+Uma nova janela vai abrir mostrando o status.
+
+Voce vera:
+   ✅ Servidor OK
+   Webhooks: 1
+   Mensagens: 1
+
+================================================================================
+ARQUIVOS IMPORTANTES
+================================================================================
+
+Scripts para executar:
+   - start-server.bat      (Inicia o servidor)
+   - test-server.bat       (Testa o webhook)
+   - monitor-server.bat    (Monitora o status)
+
+Documentacao:
+   - COMO_USAR.md          (Guia passo-a-passo)
+   - START_HERE.md         (Comece aqui)
+   - README.md             (Visao geral)
+   - TROUBLESHOOTING.md    (Resolver problemas)
+
+Configuracao:
+   - .env                  (Suas credenciais - EDITE ISTO!)
+   - .env.example          (Template)
+
+Codigo:
+   - index.js              (Servidor principal)
+   - test-webhook.js       (Script de teste)
+   - monitoring.js         (Monitor)
+
+================================================================================
+CHECKLIST RAPIDO
+================================================================================
+
+[ ] 1. Editar .env com credenciais
+[ ] 2. Clicar em start-server.bat
+[ ] 3. Clicar em test-server.bat (outro terminal)
+[ ] 4. Ver "✅ Webhook enviado com sucesso!"
+[ ] 5. Pronto!
+
+================================================================================
+PROBLEMAS?
+================================================================================
+
+Se nao funcionar:
+
+1. Verifique se Node.js esta instalado:
+   - Abra CMD
+   - Digite: node --version
+   - Se nao funcionar, baixe em: https://nodejs.org
+
+2. Verifique se .env esta correto:
+   - Abra .env com Bloco de Notas
+   - Verifique todas as credenciais
+   - Salve
+
+3. Leia TROUBLESHOOTING.md para mais ajuda
+
+================================================================================
+PROXIMOS PASSOS
+================================================================================
+
+Depois que tudo funcionar:
+
+1. Testar com ngrok (expor para internet)
+   - Veja: NGROK_SETUP.md
+
+2. Fazer deploy em nuvem
+   - Veja: deploy-guide.md
+
+3. Configurar alertas
+   - Veja: SLACK_ALERTS.md
+
+================================================================================
+DUVIDAS?
+================================================================================
+
+Leia os arquivos .md:
+   - COMO_USAR.md          (Guia completo)
+   - START_HERE.md         (Comece aqui)
+   - INDEX.md              (Indice de tudo)
+
+================================================================================
+
+Pronto para comecar? Clique em start-server.bat!
+
+================================================================================

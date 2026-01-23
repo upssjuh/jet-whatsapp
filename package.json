@@ -1,0 +1,25 @@
+{
+  "name": "jet-whatsapp-integration",
+  "version": "1.0.0",
+  "description": "Integração JET + WhatsApp via Convert API",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "node index.js",
+    "test": "node test-webhook.js",
+    "monitor": "node monitoring.js"
+  },
+  "dependencies": {
+    "axios": "^1.13.2",
+    "dotenv": "^16.0.3",
+    "express": "^5.2.1",
+    "localtunnel": "^2.0.2"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.17",
+    "@types/node": "^20.0.0"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  }
+}
