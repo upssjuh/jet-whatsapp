@@ -140,7 +140,7 @@ async function buscarPedidoJet(orderId) {
     }
 }
 
-async function enviarWhatsapp(telefone, nome, rastreio) {
+async function enviarWhatsapp(telefone, nome, rastreio, endereco) {
     console.log(`📱 Enviando WhatsApp para ${nome} (${telefone})...`);
     
     let phone = telefone.replace(/\D/g, '');
@@ -159,7 +159,8 @@ async function enviarWhatsapp(telefone, nome, rastreio) {
                         "type": "body",
                         "parameters": [
                             { "type": "text", "text": nome },
-                            { "type": "text", "text": rastreio }
+                            { "type": "text", "text": rastreio },
+                            { "type": "text", "text": endereco || "Não informado" }
                         ]
                     }
                 ]
@@ -220,9 +221,13 @@ app.post('/webhook', async (req, res) => {
                              dados.Customer?.Telephone;
             
             const nome = dados.nameCustomer || dados.Customer?.Name || "Cliente";
+            
+            const endereco = dados.Address?.Street || 
+                            dados.address || 
+                            "Não informado";
 
             if (rastreio && telefone) {
-                await enviarWhatsapp(telefone, nome, rastreio);
+                await enviarWhatsapp(telefone, nome, rastreio, endereco);
             } else {
                 console.log('⚠️ Dados incompletos. Rastreio:', rastreio, 'Telefone:', telefone);
             }
