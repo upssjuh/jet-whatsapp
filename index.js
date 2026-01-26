@@ -8,10 +8,9 @@ const app = express();
 app.use(express.json());
 
 const JET_AUTH_DATA = {
-    "IntegrationKey": process.env.JET_INTEGRATION_KEY || "MjAwMDUxOTU4Mw==",
-    "UserName": process.env.JET_USERNAME || "Y2NnbF9hZG1wZWRpZG8=",
-    "Password": process.env.JET_PASSWORD || "YWRtcGVkaWRvY2NnbDJAMjRBM0JCMkIyQw==",
-    "StoreID": process.env.JET_STORE_ID || "MjAwMDUxOQ=="
+    "storeID": process.env.JET_STORE_ID || "MjAwMDUxOQ==",
+    "userName": process.env.JET_USERNAME || "Y2NnbF9hZG1wZWRpZG8=",
+    "password": process.env.JET_PASSWORD || "YWRtcGVkaWRvY2NnbDJAMjRBM0JCMkIyQw=="
 };
 
 const CONVERT_CONFIG = {
@@ -88,12 +87,14 @@ async function loginJet() {
     }
 }
 async function getJetAuthHeaders() {
-    if (!cachedJetToken) {
-        await loginJet();
+    const token = process.env.JET_TOKEN;
+    if (!token) {
+        console.error("❌ JET_TOKEN não configurado!");
+        return null;
     }
     return {
         'accept': 'application/json',
-        'Authorization': `Bearer ${cachedJetToken}`
+        'Authorization': `Bearer ${token}`
     };
 }
 
@@ -263,5 +264,4 @@ app.listen(PORT, () => {
     console.log(`Status disponível em: http://localhost:${PORT}/status`);
     console.log(`Teste webhook em: http://localhost:${PORT}/test-webhook`);
     console.log('Aguardando chamadas da JET...\n');
-    loginJet();
 });
