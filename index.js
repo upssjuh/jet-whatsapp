@@ -66,7 +66,7 @@ async function loginJet() {
         if (response.data && response.data.access_token) {
             cachedJetToken = response.data.access_token;
             lastTokenTime = Date.now();
-            console.log("LOGIN SUCESSO! Token gerado: " + cachedJetToken.substring(0, 20) + "...");
+            console.log("✅ LOGIN SUCESSO! Token gerado: " + cachedJetToken.substring(0, 20) + "...");
             return cachedJetToken;
         } else {
             console.log("Login retornou estrutura diferente:", response.data);
@@ -103,6 +103,8 @@ async function buscarPedidoJet(orderId) {
         console.log(`Buscando pedido ${orderId}...`);
         
         let headers = await getJetAuthHeaders();
+        if (!headers) return null;
+        
         const url = `https://adm-pedido-neo1.plataformaneo.com.br/api/v1/adm_order/GetOrder/${orderId}`;
         const agent = new https.Agent({ rejectUnauthorized: false });
 
@@ -115,27 +117,6 @@ async function buscarPedidoJet(orderId) {
         return response.data;
 
     } catch (error) {
-        if (error.response && error.response.status === 401) {
-            console.log("Token parece inválido (401). Renovando login...");
-            cachedJetToken = null;
-            
-            await loginJet();
-            
-            try {
-                headers = await getJetAuthHeaders();
-                console.log(`Tentando buscar pedido ${orderId} novamente...`);
-                const retryResponse = await axios.get(url, { 
-                    headers: headers,
-                    params: { integrationKey: JET_AUTH_DATA.IntegrationKey },
-                    httpsAgent: agent 
-                });
-                return retryResponse.data;
-            } catch (retryError) {
-                console.error("Falha na segunda tentativa:", retryError.message);
-                return null;
-            }
-        }
-        
         console.error("Erro ao buscar pedido:", error.message);
         return null;
     }
