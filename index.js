@@ -57,7 +57,7 @@ const monitoring = {
 async function loginJet() {
     console.log("Tentando fazer login na JET...");
     
-    const url = 'https://adm-pedido-neo1.plataformaneo.com.br/api/v1/adm_order/GetOrder/{idOrder}';
+    const url = 'https://adm-pedido-neo1.plataformaneo.com.br/api/v1/auth';
     
     try {
         const agent = new https.Agent({ rejectUnauthorized: false });
@@ -168,12 +168,12 @@ async function enviarWhatsapp(telefone, nome, rastreio, endereco) {
         }, {
             headers: { 'Authorization': `Bearer ${CONVERT_CONFIG.token}` }
         });
-        console.log("✅ Mensagem enviada com sucesso!");
+        console.log("Mensagem enviada com sucesso!");
         monitoring.mensagensEnviadas++;
         monitoring.ultimaAtividade = new Date();
     } catch (error) {
         const mensagem = `Erro na Convert: ${error.response?.data?.message || error.message}`;
-        console.error("❌ " + mensagem);
+        console.error(" " + mensagem);
         monitoring.registrarErro(mensagem);
     }
 }
@@ -182,11 +182,11 @@ app.post('/webhook', async (req, res) => {
     res.status(200).send('Recebido');
     
     const evento = req.body;
-    console.log('\n📨 Webhook recebido:', evento.Event);
+    console.log('\nWebhook recebido:', evento.Event);
 
     // Ignorar webhooks de teste e verificação
     if (evento.Event === 'NotifyURL.Checking' || !evento.ModifiedId) {
-        console.log('⏭️  Ignorando webhook de teste/verificação');
+        console.log('Ignorando webhook de teste/verificação');
         return;
     }
 
@@ -201,7 +201,7 @@ app.post('/webhook', async (req, res) => {
         const dados = await buscarPedidoJet(idPedido);
         
         if (dados) {
-            console.log("✅ Pedido encontrado! Cliente:", dados.Customer?.Name || dados.nameCustomer);
+            console.log("Pedido encontrado! Cliente:", dados.Customer?.Name || dados.nameCustomer);
 
             let rastreio = dados.trackingLink || 
                            dados.Delivery?.TrackingCode || 
@@ -229,7 +229,7 @@ app.post('/webhook', async (req, res) => {
             if (rastreio && telefone) {
                 await enviarWhatsapp(telefone, nome, rastreio, endereco);
             } else {
-                console.log('⚠️ Dados incompletos. Rastreio:', rastreio, 'Telefone:', telefone);
+                console.log('Dados incompletos. Rastreio:', rastreio, 'Telefone:', telefone);
             }
         }
     }
@@ -242,7 +242,7 @@ app.get('/status', (req, res) => {
 
 // Endpoint para simular webhook (desenvolvimento local)
 app.post('/test-webhook', async (req, res) => {
-    console.log('\n🧪 TESTE: Simulando webhook...');
+    console.log('\nTESTE: Simulando webhook...');
     const testEvent = {
         Event: 'Pedido.Enviado',
         ModifiedId: req.body.orderId || '123456'
@@ -258,10 +258,10 @@ app.post('/test-webhook', async (req, res) => {
 });
 
 app.listen(PORT, () => {
-    console.log(`\n🚀 Servidor rodando na porta ${PORT}`);
-    console.log(`📍 Ambiente: ${ENVIRONMENT}`);
-    console.log(`📊 Status disponível em: http://localhost:${PORT}/status`);
-    console.log(`🧪 Teste webhook em: http://localhost:${PORT}/test-webhook`);
+    console.log(`\nServidor rodando na porta ${PORT}`);
+    console.log(`Ambiente: ${ENVIRONMENT}`);
+    console.log(`Status disponível em: http://localhost:${PORT}/status`);
+    console.log(`Teste webhook em: http://localhost:${PORT}/test-webhook`);
     console.log('Aguardando chamadas da JET...\n');
     loginJet();
 });
