@@ -87,14 +87,12 @@ async function loginJet() {
     }
 }
 async function getJetAuthHeaders() {
-    const token = process.env.JET_TOKEN;
-    if (!token) {
-        console.error("❌ JET_TOKEN não configurado!");
-        return null;
+    if (!cachedJetToken) {
+        await loginJet();
     }
     return {
         'accept': 'application/json',
-        'Authorization': `Bearer ${token}`
+        'Authorization': `Bearer ${cachedJetToken}`
     };
 }
 
@@ -245,4 +243,5 @@ app.listen(PORT, () => {
     console.log(`Status disponível em: http://localhost:${PORT}/status`);
     console.log(`Teste webhook em: http://localhost:${PORT}/test-webhook`);
     console.log('Aguardando chamadas da JET...\n');
+    loginJet();
 });
