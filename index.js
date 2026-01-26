@@ -57,7 +57,7 @@ const monitoring = {
 async function loginJet() {
     console.log("Tentando fazer login na JET...");
     
-    const url = 'https://adm-pedido-neo1.plataformaneo.com.br/api/v1/adm_order/InsertOrder';
+    const url = 'https://adm-pedido-neo1.plataformaneo.com.br/api/v1/adm_orderstatus/SetOrderStatus';
     
     try {
         const agent = new https.Agent({ rejectUnauthorized: false });
