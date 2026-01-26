@@ -66,7 +66,7 @@ async function loginJet() {
         if (response.data && response.data.access_token) {
             cachedJetToken = response.data.access_token;
             lastTokenTime = Date.now();
-            console.log("✅ LOGIN SUCESSO! Token gerado: " + cachedJetToken.substring(0, 20) + "...");
+            console.log("LOGIN SUCESSO! Token gerado: " + cachedJetToken.substring(0, 20) + "...");
             return cachedJetToken;
         } else {
             console.log("Login retornou estrutura diferente:", response.data);
