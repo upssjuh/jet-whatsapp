@@ -146,36 +146,37 @@ async function enviarWhatsapp(telefone, nome, rastreio, endereco) {
 
     const url = `${CONVERT_CONFIG.serverUrl}/api/v1/livechat/templates/send`;
     
+    // Extrair apenas a rua do endereço se for objeto
+    let enderecoStr = endereco;
+    if (typeof endereco === 'object' && endereco !== null) {
+        enderecoStr = endereco.streetAddress || "Não informado";
+    }
+    
     // Tentar diferentes formatos de payload
     const payloads = [
-        // Formato 1: Simples
+        // Formato 1: recipient em vez de to
         {
-            to: phone,
+            recipient: phone,
             template_name: CONVERT_CONFIG.templateName,
-            parameters: [nome, rastreio, endereco || "Não informado"]
+            parameters: [nome, rastreio, enderecoStr || "Não informado"]
         },
-        // Formato 2: Com language
+        // Formato 2: phone em vez de to
         {
-            to: phone,
+            phone: phone,
             template_name: CONVERT_CONFIG.templateName,
-            language: "pt_BR",
-            parameters: [nome, rastreio, endereco || "Não informado"]
+            parameters: [nome, rastreio, enderecoStr || "Não informado"]
         },
-        // Formato 3: Com channel_id
+        // Formato 3: number em vez de to
         {
-            channel_id: "whatsapp",
-            to: phone,
+            number: phone,
             template_name: CONVERT_CONFIG.templateName,
-            parameters: [nome, rastreio, endereco || "Não informado"]
+            parameters: [nome, rastreio, enderecoStr || "Não informado"]
         },
-        // Formato 4: Com type
+        // Formato 4: contact em vez de to
         {
-            to: phone,
-            type: "template",
-            template: {
-                name: CONVERT_CONFIG.templateName,
-                parameters: [nome, rastreio, endereco || "Não informado"]
-            }
+            contact: phone,
+            template_name: CONVERT_CONFIG.templateName,
+            parameters: [nome, rastreio, enderecoStr || "Não informado"]
         }
     ];
 
