@@ -144,73 +144,41 @@ async function enviarWhatsapp(telefone, nome, rastreio, endereco) {
     let phone = telefone.replace(/\D/g, '');
     if (!phone.startsWith('55')) phone = '55' + phone;
 
-    try {
-        const url = `${CONVERT_CONFIG.serverUrl}/api/v1/livechat/templates/send`;
-        
-        console.log(`📤 Enviando para: ${url}`);
-        
-        // Tentar com X-API-Key em vez de Bearer
-        const payload = {
-            to: phone,
-            template_name: CONVERT_CONFIG.templateName,
-            parameters: [nome, rastreio, endereco || "Não informado"]
-        };
-        
-        const response = await axios.post(url, payload, {
-            headers: { 
-                'X-API-Key': CONVERT_CONFIG.token,
-                'Content-Type': 'application/json'
-            },
-            timeout: 10000
-        });
+    const endpoints = [
+        `${CONVERT_CONFIG.serverUrl}/api/v1/livechat/templates/send`,
+        `${CONVERT_CONFIG.serverUrl}/api/v1/whatsapp/send`,
+        `${CONVERT_CONFIG.serverUrl}/api/v1/whatsapp/send_template`
+    ];
 
-        console.log("✅ Mensagem enviada com sucesso!");
-        monitoring.mensagensEnviadas++;
-        monitoring.ultimaAtividade = new Date();
-    } catch (error) {
-        // Se falhar com X-API-Key, tentar com Bearer
-        if (error.response?.status === 401) {
-            try {
-                console.log("Tentando com Bearer token...");
-                const url = `${CONVERT_CONFIG.serverUrl}/api/v1/livechat/templates/send`;
-                const payload = {
-                    to: phone,
-                    template_name: CONVERT_CONFIG.templateName,
-                    parameters: [nome, rastreio, endereco || "Não informado"]
-                };
-                
-                const response = await axios.post(url, payload, {
-                    headers: { 
-                        'Authorization': `Bearer ${CONVERT_CONFIG.token}`,
-                        'Content-Type': 'application/json'
-                    },
-                    timeout: 10000
-                });
+    for (let endpoint of endpoints) {
+        try {
+            console.log(`📤 Tentando: ${endpoint}`);
+            
+            const payload = {
+                to: phone,
+                template_name: CONVERT_CONFIG.templateName,
+                parameters: [nome, rastreio, endereco || "Não informado"]
+            };
+            
+            const response = await axios.post(endpoint, payload, {
+                headers: { 
+                    'Authorization': `Bearer ${CONVERT_CONFIG.token}`,
+                    'Content-Type': 'application/json'
+                },
+                timeout: 10000
+            });
 
-                console.log("✅ Mensagem enviada com sucesso!");
-                monitoring.mensagensEnviadas++;
-                monitoring.ultimaAtividade = new Date();
-                return;
-            } catch (error2) {
-                // Continuar com erro original
-            }
+            console.log("✅ Mensagem enviada com sucesso!");
+            monitoring.mensagensEnviadas++;
+            monitoring.ultimaAtividade = new Date();
+            return;
+        } catch (error) {
+            console.log(`❌ ${endpoint}: ${error.response?.status || error.code}`);
         }
-        
-        let mensagem = "Erro na Convert: ";
-        
-        if (error.code === 'ENOTFOUND') {
-            mensagem += `Servidor Convert não acessível (DNS: ${error.hostname})`;
-        } else if (error.code === 'ECONNREFUSED') {
-            mensagem += `Conexão recusada ao servidor Convert`;
-        } else if (error.response) {
-            mensagem += `${error.response.status} - ${error.response.data?.message || error.message}`;
-        } else {
-            mensagem += error.message;
-        }
-        
-        console.error("❌ " + mensagem);
-        monitoring.registrarErro(mensagem);
     }
+    
+    console.error("❌ Erro na Convert: Nenhum endpoint funcionou");
+    monitoring.registrarErro("Erro na Convert: Nenhum endpoint funcionou");
 }
 
 app.post('/webhook', async (req, res) => {
