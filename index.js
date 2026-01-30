@@ -150,24 +150,11 @@ async function enviarWhatsapp(telefone, nome, rastreio, endereco) {
         console.log(`📤 Enviando para: ${url}`);
         console.log(`🔑 Token: ${CONVERT_CONFIG.token ? CONVERT_CONFIG.token.substring(0, 20) + '...' : 'NÃO CONFIGURADO'}`);
         
+        // Tentar formato simples
         const payload = {
-            "channel_id": "whatsapp",
-            "to": phone,
-            "type": "template",
-            "template": {
-                "name": CONVERT_CONFIG.templateName,
-                "language": { "code": "pt_BR" },
-                "components": [
-                    {
-                        "type": "body",
-                        "parameters": [
-                            { "type": "text", "text": nome },
-                            { "type": "text", "text": rastreio },
-                            { "type": "text", "text": endereco || "Não informado" }
-                        ]
-                    }
-                ]
-            }
+            to: phone,
+            template_name: CONVERT_CONFIG.templateName,
+            parameters: [nome, rastreio, endereco || "Não informado"]
         };
         
         const response = await axios.post(url, payload, {
