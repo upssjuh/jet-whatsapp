@@ -7,10 +7,16 @@ require('dotenv').config();
 const app = express();
 app.use(express.json());
 
+// Função para converter texto para base64
+function toBase64(str) {
+    return Buffer.from(str).toString('base64');
+}
+
 const JET_AUTH_DATA = {
-    "storeID": process.env.JET_STORE_ID || "2000519",
-    "userName": process.env.JET_USERNAME || "ccgl_admpedido",
-    "password": process.env.JET_PASSWORD || "admpedidoccgl2@24A3BB2B2C"
+    "IntegrationKey": process.env.JET_INTEGRATION_KEY || toBase64("2000519583"),
+    "UserName": process.env.JET_USERNAME || toBase64("ccgl_admpedido"),
+    "Password": process.env.JET_PASSWORD || toBase64("admpedidoccgl2@24A3BB2B2C"),
+    "StoreID": process.env.JET_STORE_ID || toBase64("2000519")
 };
 
 const CONVERT_CONFIG = {
@@ -55,67 +61,44 @@ const monitoring = {
 
 async function loginJet() {
     console.log("Tentando fazer login na JET...");
-    console.log("✓ Credenciais:", {
-        storeID: JET_AUTH_DATA.storeID,
-        userName: JET_AUTH_DATA.userName,
-        password: "***"
-    });
     
     const url = 'https://adm-pedido-neo1.plataformaneo.com.br/api/v1/auth';
     
-    // Tentar diferentes formatos de payload
-    const payloads = [
-        // Formato 1: Com nomes em camelCase
-        {
-            "storeID": JET_AUTH_DATA.storeID,
-            "userName": JET_AUTH_DATA.userName,
-            "password": JET_AUTH_DATA.password
-        },
-        // Formato 2: Com nomes em PascalCase
-        {
-            "StoreID": JET_AUTH_DATA.storeID,
-            "UserName": JET_AUTH_DATA.userName,
-            "Password": JET_AUTH_DATA.password
-        },
-        // Formato 3: Com IntegrationKey
-        {
-            "IntegrationKey": process.env.JET_INTEGRATION_KEY || "",
-            "StoreID": JET_AUTH_DATA.storeID,
-            "UserName": JET_AUTH_DATA.userName,
-            "Password": JET_AUTH_DATA.password
-        }
-    ];
-    
-    for (let i = 0; i < payloads.length; i++) {
-        try {
-            console.log(`\n📤 Tentativa ${i + 1}:`, JSON.stringify(payloads[i], null, 2));
-            
-            const agent = new https.Agent({ rejectUnauthorized: false });
-            
-            const response = await axios.post(url, payloads[i], { 
-                httpsAgent: agent,
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json'
-                }
-            });
-
-            if (response.data && response.data.access_token) {
-                cachedJetToken = response.data.access_token;
-                lastTokenTime = Date.now();
-                console.log("✅ LOGIN SUCESSO! Token gerado: " + cachedJetToken.substring(0, 20) + "...");
-                return cachedJetToken;
-            } else {
-                console.log("⚠️ Resposta inesperada:", response.data);
+    try {
+        console.log(`\n📤 Enviando credenciais:`, JSON.stringify(JET_AUTH_DATA, null, 2));
+        
+        const agent = new https.Agent({ rejectUnauthorized: false });
+        
+        const response = await axios.post(url, JET_AUTH_DATA, { 
+            httpsAgent: agent,
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
             }
-        } catch (error) {
-            console.error(`❌ Tentativa ${i + 1} falhou:`, error.response?.status, error.response?.data);
+        });
+
+        if (response.data && response.data.access_token) {
+            cachedJetToken = response.data.access_token;
+            lastTokenTime = Date.now();
+            console.log("✅ LOGIN SUCESSO! Token gerado: " + cachedJetToken.substring(0, 20) + "...");
+            return cachedJetToken;
+        } else {
+            console.log("⚠️ Resposta inesperada:", response.data);
+            monitoring.registrarErro("Login JET retornou estrutura inesperada");
+            return null;
         }
+    } catch (error) {
+        const mensagem = `Falha ao logar em: ${url}`;
+        console.error(mensagem);
+        if (error.response) {
+            console.error(`Status: ${error.response.status} - ${error.response.statusText}`);
+            console.error("Mensagem:", JSON.stringify(error.response.data));
+        } else {
+            console.error("Erro:", error.message);
+        }
+        monitoring.registrarErro(mensagem);
+        return null;
     }
-    
-    console.error("❌ Todas as tentativas falharam");
-    monitoring.registrarErro("Falha ao logar em JET - todas as tentativas");
-    return null;
 }
 async function getJetAuthHeaders() {
     // Verifica se o token expirou
