@@ -17,8 +17,8 @@ const JET_AUTH_DATA = {
 
 const CONVERT_CONFIG = {
     serverUrl: 'https://chatccgl.convert.app.br',
-    token: process.env.CONVERT_TOKEN,
-    templateName: process.env.CONVERT_TEMPLATE || 'confirmacao_entrega'
+    token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhcHBfaWQiOiI2OTNjMGIyYWVkM2NjMGZjZGQ1N2U4YzAiLCJpYXQiOjE3Njk3OTEzNTd9.4dDhQNRUx7nvrGiEOUPU8qEnbb9Zsi9YAnEYG057rRg',
+    templateName: 'confirmacao_entrega'
 };
 
 const PORT = process.env.PORT || 3000;
@@ -148,9 +148,8 @@ async function enviarWhatsapp(telefone, nome, rastreio, endereco) {
         const url = `${CONVERT_CONFIG.serverUrl}/api/v1/livechat/templates/send`;
         
         console.log(`📤 Enviando para: ${url}`);
-        console.log(`🔑 Token: ${CONVERT_CONFIG.token ? CONVERT_CONFIG.token.substring(0, 20) + '...' : 'NÃO CONFIGURADO'}`);
         
-        // Tentar formato simples
+        // Tentar com X-API-Key em vez de Bearer
         const payload = {
             to: phone,
             template_name: CONVERT_CONFIG.templateName,
@@ -159,7 +158,7 @@ async function enviarWhatsapp(telefone, nome, rastreio, endereco) {
         
         const response = await axios.post(url, payload, {
             headers: { 
-                'Authorization': `Bearer ${CONVERT_CONFIG.token}`,
+                'X-API-Key': CONVERT_CONFIG.token,
                 'Content-Type': 'application/json'
             },
             timeout: 10000
@@ -169,6 +168,34 @@ async function enviarWhatsapp(telefone, nome, rastreio, endereco) {
         monitoring.mensagensEnviadas++;
         monitoring.ultimaAtividade = new Date();
     } catch (error) {
+        // Se falhar com X-API-Key, tentar com Bearer
+        if (error.response?.status === 401) {
+            try {
+                console.log("Tentando com Bearer token...");
+                const url = `${CONVERT_CONFIG.serverUrl}/api/v1/livechat/templates/send`;
+                const payload = {
+                    to: phone,
+                    template_name: CONVERT_CONFIG.templateName,
+                    parameters: [nome, rastreio, endereco || "Não informado"]
+                };
+                
+                const response = await axios.post(url, payload, {
+                    headers: { 
+                        'Authorization': `Bearer ${CONVERT_CONFIG.token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    timeout: 10000
+                });
+
+                console.log("✅ Mensagem enviada com sucesso!");
+                monitoring.mensagensEnviadas++;
+                monitoring.ultimaAtividade = new Date();
+                return;
+            } catch (error2) {
+                // Continuar com erro original
+            }
+        }
+        
         let mensagem = "Erro na Convert: ";
         
         if (error.code === 'ENOTFOUND') {
