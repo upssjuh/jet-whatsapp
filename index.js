@@ -60,6 +60,11 @@ const monitoring = {
 
 async function loginJet() {
     console.log("Tentando fazer login na JET...");
+    console.log("Credenciais sendo enviadas:", {
+        storeID: JET_AUTH_DATA.storeID,
+        userName: JET_AUTH_DATA.userName,
+        password: JET_AUTH_DATA.password ? "***" : "vazio"
+    });
     
     const url = 'https://adm-pedido-neo1.plataformaneo.com.br/api/v1/auth';
     
