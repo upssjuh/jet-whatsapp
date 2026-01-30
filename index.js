@@ -7,20 +7,10 @@ require('dotenv').config();
 const app = express();
 app.use(express.json());
 
-// Função para decodificar base64 com tratamento de encoding
-function decodeBase64(str) {
-    try {
-        return Buffer.from(str, 'base64').toString('utf8');
-    } catch (error) {
-        console.error("Erro ao decodificar:", str, error.message);
-        return str;
-    }
-}
-
 const JET_AUTH_DATA = {
-    "storeID": decodeBase64(process.env.JET_STORE_ID || "MjAwMDUxOQ=="),
-    "userName": decodeBase64(process.env.JET_USERNAME || "Y2NnbF9hZG1wZWRpZG8="),
-    "password": decodeBase64(process.env.JET_PASSWORD || "YWRtcGVkaWRvY2NnbDJAMjRBM0JCMkIyQw==")
+    "storeID": process.env.JET_STORE_ID || "2000519",
+    "userName": process.env.JET_USERNAME || "ccgl_admpedido",
+    "password": process.env.JET_PASSWORD || "admpedidoccgl2@24A3BB2B2C"
 };
 
 const CONVERT_CONFIG = {
