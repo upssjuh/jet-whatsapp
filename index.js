@@ -152,57 +152,41 @@ async function enviarWhatsapp(telefone, nome, rastreio, endereco) {
         enderecoStr = endereco.streetAddress || "Não informado";
     }
     
-    // Tentar diferentes formatos de payload
-    const payloads = [
-        // Formato 1: recipient em vez de to
-        {
+    try {
+        const payload = {
             recipient: phone,
             template_name: CONVERT_CONFIG.templateName,
             parameters: [nome, rastreio, enderecoStr || "Não informado"]
-        },
-        // Formato 2: phone em vez de to
-        {
-            phone: phone,
-            template_name: CONVERT_CONFIG.templateName,
-            parameters: [nome, rastreio, enderecoStr || "Não informado"]
-        },
-        // Formato 3: number em vez de to
-        {
-            number: phone,
-            template_name: CONVERT_CONFIG.templateName,
-            parameters: [nome, rastreio, enderecoStr || "Não informado"]
-        },
-        // Formato 4: contact em vez de to
-        {
-            contact: phone,
-            template_name: CONVERT_CONFIG.templateName,
-            parameters: [nome, rastreio, enderecoStr || "Não informado"]
-        }
-    ];
+        };
+        
+        console.log(`📤 Enviando:`, JSON.stringify(payload));
+        
+        const response = await axios.post(url, payload, {
+            headers: { 
+                'Authorization': `Bearer ${CONVERT_CONFIG.token}`,
+                'Content-Type': 'application/json'
+            },
+            timeout: 10000
+        });
 
-    for (let i = 0; i < payloads.length; i++) {
-        try {
-            console.log(`📤 Tentativa ${i + 1}:`, JSON.stringify(payloads[i]));
-            
-            const response = await axios.post(url, payloads[i], {
-                headers: { 
-                    'Authorization': `Bearer ${CONVERT_CONFIG.token}`,
-                    'Content-Type': 'application/json'
-                },
-                timeout: 10000
-            });
-
-            console.log("✅ Mensagem enviada com sucesso!");
-            monitoring.mensagensEnviadas++;
-            monitoring.ultimaAtividade = new Date();
-            return;
-        } catch (error) {
-            console.log(`❌ Tentativa ${i + 1}: ${error.response?.status} - ${error.response?.data?.message || error.message}`);
+        console.log("✅ Mensagem enviada com sucesso!");
+        console.log("Resposta:", JSON.stringify(response.data));
+        monitoring.mensagensEnviadas++;
+        monitoring.ultimaAtividade = new Date();
+    } catch (error) {
+        let mensagem = "Erro na Convert: ";
+        
+        if (error.response) {
+            mensagem += `${error.response.status} - ${error.response.data?.message || JSON.stringify(error.response.data)}`;
+            console.error("❌ " + mensagem);
+            console.error("Resposta completa:", JSON.stringify(error.response.data, null, 2));
+        } else {
+            mensagem += error.message;
+            console.error("❌ " + mensagem);
         }
+        
+        monitoring.registrarErro(mensagem);
     }
-    
-    console.error("❌ Erro na Convert: Nenhum formato de payload funcionou");
-    monitoring.registrarErro("Erro na Convert: Nenhum formato de payload funcionou");
 }
 
 app.post('/webhook', async (req, res) => {
