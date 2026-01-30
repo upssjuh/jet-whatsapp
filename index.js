@@ -17,7 +17,7 @@ const JET_AUTH_DATA = {
 
 const CONVERT_CONFIG = {
     serverUrl: 'https://chatccgl.convert.app.br',
-    token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhcHBfaWQiOiI2OTNjMGIyYWVkM2NjMGZjZGQ1N2U4YzAiLCJpYXQiOjE3Njk3OTEzNTd9.4dDhQNRUx7nvrGiEOUPU8qEnbb9Zsi9YAnEYG057rRg',
+    token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhcHBfaWQiOiI2OTNjMGIyYWVkM2NjMGZjZGQ1N2U4YzAiLCJpYXQiOjE3Njk3OTMzMTl9.vlwh0EzWifnHSbV774jBA8c1NpS9td17A0ZbuLjOaiQ',
     templateName: 'confirmacao_entrega'
 };
 
