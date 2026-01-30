@@ -17,7 +17,7 @@ const JET_AUTH_DATA = {
 
 const CONVERT_CONFIG = {
     serverUrl: 'https://chatccgl.convert.app.br',
-    token: process.env.CONVERT_TOKEN || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhcHBfaWQiOiI2OTNjMGIyYWVkM2NjMGZjZGQ1N2U4YzAiLCJpYXQiOjE3NjkxNzUwMzV9.2WX85D9GjIp2-YV0mO8mwP0gYixR9p6hHXCM80ZZWtc',
+    token: process.env.CONVERT_TOKEN,
     templateName: process.env.CONVERT_TEMPLATE || 'confirmacao_entrega'
 };
 
