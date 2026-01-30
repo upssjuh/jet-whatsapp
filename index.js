@@ -147,6 +147,9 @@ async function enviarWhatsapp(telefone, nome, rastreio, endereco) {
     try {
         const url = `${CONVERT_CONFIG.serverUrl}/api/v1/livechat/templates/send`;
         
+        console.log(`📤 Enviando para: ${url}`);
+        console.log(`🔑 Token: ${CONVERT_CONFIG.token ? CONVERT_CONFIG.token.substring(0, 20) + '...' : 'NÃO CONFIGURADO'}`);
+        
         const payload = {
             "channel_id": "whatsapp",
             "to": phone,
@@ -166,8 +169,6 @@ async function enviarWhatsapp(telefone, nome, rastreio, endereco) {
                 ]
             }
         };
-
-        console.log(`📤 Enviando para: ${url}`);
         
         const response = await axios.post(url, payload, {
             headers: { 
