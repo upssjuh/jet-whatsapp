@@ -55,10 +55,11 @@ const monitoring = {
 
 async function loginJet() {
     console.log("Tentando fazer login na JET...");
-    
-    // Verificar decodificação
-    const decodedPassword = decodeBase64(process.env.JET_PASSWORD || "YWRtcGVkaWRvY2NnbDJAMjRBM0JCMkIyQw==");
-    console.log("✓ Senha decodificada:", decodedPassword);
+    console.log("✓ Credenciais:", {
+        storeID: JET_AUTH_DATA.storeID,
+        userName: JET_AUTH_DATA.userName,
+        password: "***"
+    });
     
     const url = 'https://adm-pedido-neo1.plataformaneo.com.br/api/v1/auth';
     
@@ -78,7 +79,7 @@ async function loginJet() {
         },
         // Formato 3: Com IntegrationKey
         {
-            "IntegrationKey": process.env.JET_INTEGRATION_KEY ? decodeBase64(process.env.JET_INTEGRATION_KEY) : "",
+            "IntegrationKey": process.env.JET_INTEGRATION_KEY || "",
             "StoreID": JET_AUTH_DATA.storeID,
             "UserName": JET_AUTH_DATA.userName,
             "Password": JET_AUTH_DATA.password
