@@ -7,9 +7,14 @@ require('dotenv').config();
 const app = express();
 app.use(express.json());
 
-// Função para decodificar base64
+// Função para decodificar base64 com tratamento de encoding
 function decodeBase64(str) {
-    return Buffer.from(str, 'base64').toString('utf-8');
+    try {
+        return Buffer.from(str, 'base64').toString('utf8');
+    } catch (error) {
+        console.error("Erro ao decodificar:", str, error.message);
+        return str;
+    }
 }
 
 const JET_AUTH_DATA = {
@@ -60,6 +65,10 @@ const monitoring = {
 
 async function loginJet() {
     console.log("Tentando fazer login na JET...");
+    
+    // Verificar decodificação
+    const decodedPassword = decodeBase64(process.env.JET_PASSWORD || "YWRtcGVkaWRvY2NnbDJAMjRBM0JCMkIyQw==");
+    console.log("✓ Senha decodificada:", decodedPassword);
     
     const url = 'https://adm-pedido-neo1.plataformaneo.com.br/api/v1/auth';
     
