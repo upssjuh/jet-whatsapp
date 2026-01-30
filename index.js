@@ -7,11 +7,6 @@ require('dotenv').config();
 const app = express();
 app.use(express.json());
 
-// Função para converter texto para base64
-function toBase64(str) {
-    return Buffer.from(str).toString('base64');
-}
-
 // Credenciais em base64 (hardcoded, ignorando .env com encoding errado)
 const JET_AUTH_DATA = {
     "IntegrationKey": "MjAwMDUxOTU4Mw==",
@@ -21,8 +16,9 @@ const JET_AUTH_DATA = {
 };
 
 const CONVERT_CONFIG = {
-    token: process.env.CONVERT_TOKEN || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhcHBfaWQiOiI2OTNjMGIyYWVkM2NjMGZjZGQ1N2U4YzAiLCJpYXQiOjE3NjcxMTM1NTJ9.SkL8Kn8JJCsoDIaYUFr9CKYmgkmTJiRhpC5loBxMMhQ',
-    templateName: process.env.CONVERT_TEMPLATE || 'aviso_coleta_ccgl1'
+    serverUrl: 'https://chatccgl.convert.app.br',
+    token: process.env.CONVERT_TOKEN || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhcHBfaWQiOiI2OTNjMGIyYWVkM2NjMGZjZGQ1N2U4YzAiLCJpYXQiOjE3NjkxNzUwMzV9.2WX85D9GjIp2-YV0mO8mwP0gYixR9p6hHXCM80ZZWtc',
+    templateName: process.env.CONVERT_TEMPLATE || 'confirmacao_entrega'
 };
 
 const PORT = process.env.PORT || 3000;
@@ -63,18 +59,9 @@ const monitoring = {
 async function loginJet() {
     console.log("Tentando fazer login na JET...");
     
-    // Verificar se as credenciais estão corretas
-    console.log("✓ Credenciais carregadas:");
-    console.log("  IntegrationKey:", JET_AUTH_DATA.IntegrationKey);
-    console.log("  UserName:", JET_AUTH_DATA.UserName);
-    console.log("  Password:", JET_AUTH_DATA.Password);
-    console.log("  StoreID:", JET_AUTH_DATA.StoreID);
-    
     const url = 'https://adm-pedido-neo1.plataformaneo.com.br/api/v1/auth';
     
     try {
-        console.log(`\n📤 Enviando credenciais:`, JSON.stringify(JET_AUTH_DATA, null, 2));
-        
         const agent = new https.Agent({ rejectUnauthorized: false });
         
         const response = await axios.post(url, JET_AUTH_DATA, { 
@@ -158,7 +145,9 @@ async function enviarWhatsapp(telefone, nome, rastreio, endereco) {
     if (!phone.startsWith('55')) phone = '55' + phone;
 
     try {
-        await axios.post('https://api.convert.com.br/v1/whatsapp/send_template', {
+        const url = `${CONVERT_CONFIG.serverUrl}/api/v1/livechat/templates/send`;
+        
+        const payload = {
             "channel_id": "whatsapp",
             "to": phone,
             "type": "template",
@@ -176,15 +165,35 @@ async function enviarWhatsapp(telefone, nome, rastreio, endereco) {
                     }
                 ]
             }
-        }, {
-            headers: { 'Authorization': `Bearer ${CONVERT_CONFIG.token}` }
+        };
+
+        console.log(`📤 Enviando para: ${url}`);
+        
+        const response = await axios.post(url, payload, {
+            headers: { 
+                'Authorization': `Bearer ${CONVERT_CONFIG.token}`,
+                'Content-Type': 'application/json'
+            },
+            timeout: 10000
         });
-        console.log("Mensagem enviada com sucesso!");
+
+        console.log("✅ Mensagem enviada com sucesso!");
         monitoring.mensagensEnviadas++;
         monitoring.ultimaAtividade = new Date();
     } catch (error) {
-        const mensagem = `Erro na Convert: ${error.response?.data?.message || error.message}`;
-        console.error(" " + mensagem);
+        let mensagem = "Erro na Convert: ";
+        
+        if (error.code === 'ENOTFOUND') {
+            mensagem += `Servidor Convert não acessível (DNS: ${error.hostname})`;
+        } else if (error.code === 'ECONNREFUSED') {
+            mensagem += `Conexão recusada ao servidor Convert`;
+        } else if (error.response) {
+            mensagem += `${error.response.status} - ${error.response.data?.message || error.message}`;
+        } else {
+            mensagem += error.message;
+        }
+        
+        console.error("❌ " + mensagem);
         monitoring.registrarErro(mensagem);
     }
 }
