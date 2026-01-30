@@ -12,11 +12,12 @@ function toBase64(str) {
     return Buffer.from(str).toString('base64');
 }
 
+// Credenciais em base64 (hardcoded como fallback)
 const JET_AUTH_DATA = {
-    "IntegrationKey": process.env.JET_INTEGRATION_KEY || toBase64("2000519583"),
-    "UserName": process.env.JET_USERNAME || toBase64("ccgl_admpedido"),
-    "Password": process.env.JET_PASSWORD || toBase64("admpedidoccgl2@24A3BB2B2C"),
-    "StoreID": process.env.JET_STORE_ID || toBase64("2000519")
+    "IntegrationKey": process.env.JET_INTEGRATION_KEY || "MjAwMDUxOTU4Mw==",
+    "UserName": process.env.JET_USERNAME || "Y2NnbF9hZG1wZWRpZG8=",
+    "Password": process.env.JET_PASSWORD || "YWRtcGVkaWRvY2NnbDJAMjRBM0JCMkIyQw==",
+    "StoreID": process.env.JET_STORE_ID || "MjAwMDUxOQ=="
 };
 
 const CONVERT_CONFIG = {
@@ -61,6 +62,13 @@ const monitoring = {
 
 async function loginJet() {
     console.log("Tentando fazer login na JET...");
+    
+    // Verificar se as credenciais estão corretas
+    console.log("✓ Credenciais carregadas:");
+    console.log("  IntegrationKey:", JET_AUTH_DATA.IntegrationKey);
+    console.log("  UserName:", JET_AUTH_DATA.UserName);
+    console.log("  Password:", JET_AUTH_DATA.Password);
+    console.log("  StoreID:", JET_AUTH_DATA.StoreID);
     
     const url = 'https://adm-pedido-neo1.plataformaneo.com.br/api/v1/auth';
     
