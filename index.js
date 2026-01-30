@@ -12,12 +12,12 @@ function toBase64(str) {
     return Buffer.from(str).toString('base64');
 }
 
-// Credenciais em base64 (hardcoded como fallback)
+// Credenciais em base64 (hardcoded, ignorando .env com encoding errado)
 const JET_AUTH_DATA = {
-    "IntegrationKey": process.env.JET_INTEGRATION_KEY || "MjAwMDUxOTU4Mw==",
-    "UserName": process.env.JET_USERNAME || "Y2NnbF9hZG1wZWRpZG8=",
-    "Password": process.env.JET_PASSWORD || "YWRtcGVkaWRvY2NnbDJAMjRBM0JCMkIyQw==",
-    "StoreID": process.env.JET_STORE_ID || "MjAwMDUxOQ=="
+    "IntegrationKey": "MjAwMDUxOTU4Mw==",
+    "UserName": "Y2NnbF9hZG1wZWRpZG8=",
+    "Password": "YWRtcGVkaWRvY2NnbDJAMjRBM0JCMkIyQw==",
+    "StoreID": "MjAwMDUxOQ=="
 };
 
 const CONVERT_CONFIG = {
