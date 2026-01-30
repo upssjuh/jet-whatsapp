@@ -7,10 +7,15 @@ require('dotenv').config();
 const app = express();
 app.use(express.json());
 
+// Função para decodificar base64
+function decodeBase64(str) {
+    return Buffer.from(str, 'base64').toString('utf-8');
+}
+
 const JET_AUTH_DATA = {
-    "storeID": process.env.JET_STORE_ID || "MjAwMDUxOQ==",
-    "userName": process.env.JET_USERNAME || "Y2NnbF9hZG1wZWRpZG8=",
-    "password": process.env.JET_PASSWORD || "YWRtcGVkaWRvY2NnbDJAMjRBM0JCMkIyQw=="
+    "storeID": decodeBase64(process.env.JET_STORE_ID || "MjAwMDUxOQ=="),
+    "userName": decodeBase64(process.env.JET_USERNAME || "Y2NnbF9hZG1wZWRpZG8="),
+    "password": decodeBase64(process.env.JET_PASSWORD || "YWRtcGVkaWRvY2NnbDJAMjRBM0JCMkIyQw==")
 };
 
 const CONVERT_CONFIG = {
@@ -66,7 +71,7 @@ async function loginJet() {
         if (response.data && response.data.access_token) {
             cachedJetToken = response.data.access_token;
             lastTokenTime = Date.now();
-            console.log("✅ LOGIN SUCESSO! Token gerado: " + cachedJetToken.substring(0, 20) + "...");
+            console.log("LOGIN SUCESSO! Token gerado: " + cachedJetToken.substring(0, 20) + "...");
             return cachedJetToken;
         } else {
             console.log("Login retornou estrutura diferente:", response.data);
@@ -87,12 +92,21 @@ async function loginJet() {
     }
 }
 async function getJetAuthHeaders() {
-    if (!cachedJetToken) {
-        await loginJet();
+    // Verifica se o token expirou
+    if (cachedJetToken && lastTokenTime && (Date.now() - lastTokenTime) < TOKEN_EXPIRY) {
+        return {
+            'accept': 'application/json',
+            'Authorization': `Bearer ${cachedJetToken}`
+        };
     }
+    
+    // Token expirou ou não existe, faz novo login
+    const token = await loginJet();
+    if (!token) return null;
+    
     return {
         'accept': 'application/json',
-        'Authorization': `Bearer ${cachedJetToken}`
+        'Authorization': `Bearer ${token}`
     };
 }
 
