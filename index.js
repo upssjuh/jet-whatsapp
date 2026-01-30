@@ -144,23 +144,46 @@ async function enviarWhatsapp(telefone, nome, rastreio, endereco) {
     let phone = telefone.replace(/\D/g, '');
     if (!phone.startsWith('55')) phone = '55' + phone;
 
-    const endpoints = [
-        `${CONVERT_CONFIG.serverUrl}/api/v1/livechat/templates/send`,
-        `${CONVERT_CONFIG.serverUrl}/api/v1/whatsapp/send`,
-        `${CONVERT_CONFIG.serverUrl}/api/v1/whatsapp/send_template`
+    const url = `${CONVERT_CONFIG.serverUrl}/api/v1/livechat/templates/send`;
+    
+    // Tentar diferentes formatos de payload
+    const payloads = [
+        // Formato 1: Simples
+        {
+            to: phone,
+            template_name: CONVERT_CONFIG.templateName,
+            parameters: [nome, rastreio, endereco || "Não informado"]
+        },
+        // Formato 2: Com language
+        {
+            to: phone,
+            template_name: CONVERT_CONFIG.templateName,
+            language: "pt_BR",
+            parameters: [nome, rastreio, endereco || "Não informado"]
+        },
+        // Formato 3: Com channel_id
+        {
+            channel_id: "whatsapp",
+            to: phone,
+            template_name: CONVERT_CONFIG.templateName,
+            parameters: [nome, rastreio, endereco || "Não informado"]
+        },
+        // Formato 4: Com type
+        {
+            to: phone,
+            type: "template",
+            template: {
+                name: CONVERT_CONFIG.templateName,
+                parameters: [nome, rastreio, endereco || "Não informado"]
+            }
+        }
     ];
 
-    for (let endpoint of endpoints) {
+    for (let i = 0; i < payloads.length; i++) {
         try {
-            console.log(`📤 Tentando: ${endpoint}`);
+            console.log(`📤 Tentativa ${i + 1}:`, JSON.stringify(payloads[i]));
             
-            const payload = {
-                to: phone,
-                template_name: CONVERT_CONFIG.templateName,
-                parameters: [nome, rastreio, endereco || "Não informado"]
-            };
-            
-            const response = await axios.post(endpoint, payload, {
+            const response = await axios.post(url, payloads[i], {
                 headers: { 
                     'Authorization': `Bearer ${CONVERT_CONFIG.token}`,
                     'Content-Type': 'application/json'
@@ -173,12 +196,12 @@ async function enviarWhatsapp(telefone, nome, rastreio, endereco) {
             monitoring.ultimaAtividade = new Date();
             return;
         } catch (error) {
-            console.log(`❌ ${endpoint}: ${error.response?.status || error.code}`);
+            console.log(`❌ Tentativa ${i + 1}: ${error.response?.status} - ${error.response?.data?.message || error.message}`);
         }
     }
     
-    console.error("❌ Erro na Convert: Nenhum endpoint funcionou");
-    monitoring.registrarErro("Erro na Convert: Nenhum endpoint funcionou");
+    console.error("❌ Erro na Convert: Nenhum formato de payload funcionou");
+    monitoring.registrarErro("Erro na Convert: Nenhum formato de payload funcionou");
 }
 
 app.post('/webhook', async (req, res) => {
